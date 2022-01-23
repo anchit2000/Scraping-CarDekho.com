@@ -22,15 +22,34 @@ def make_df(url : str ,car_name : str, company_name : str, model_name : str) -> 
            'DNT': '1'
            }
   try:
-    df = pd.read_html(requests.get(url,headers = headers).content)
-    df = pd.concat(df)
+    # df = pd.read_html(requests.get(url,headers = headers).content)
+    # df = pd.concat(df)
+    soup = BeautifulSoup(requests.get(url,headers = headers).content, features="html.parser")
+    df = pd.DataFrame(columns = ['car_name','company_name','model_name'])
+    df.loc[0] = "No"
+    df['car_name'], df['company_name'] = car_name.replace("_"," ").upper(), company_name.replace("_"," ").upper()
+    table_soup = soup.find_all("table")
+    index = 0
+    for table in table_soup:
+      rows = table.find("tbody").find_all("tr")
+      for row in rows:
+        data = row.find_all("td")
+        df[data[0].text] = ""
+        if data[1].text != "":
+          df[data[0].text].loc[0] = data[1].text
+        else:
+          if "check" in str(data[1]):
+            df[data[0].text].loc[0] = "Yes"
+          elif "delete" in str(data[1]):
+            df[data[0].text].loc[0] = "No"
+          else:
+            print(data[1])
     try:
       df = df.drop(['City','On-Road Price'],axis = 1)
     except Exception as e:
       # print(url)
       pass
-    df = df.dropna(subset=[0]).set_index(0).T
-    df['car_name'], df['company_name'] = car_name.replace("_"," ").upper(), company_name.replace("_"," ").upper()
+  # df = df.dropna(subset=[0]).set_index(0).T
   except Exception as e:
     print(e)
     print(e.args)
@@ -82,5 +101,5 @@ df_all_models = pd.DataFrame(columns = columns_max)
 for i in range(len(df_list)):
   df_all_models.loc[i] = df_list[i].T.to_dict()[1]
 
-
+df_all_models = df_all_models.replace(np.nan,"Not Available")
 df_all_models.to_csv("car_details.csv")
