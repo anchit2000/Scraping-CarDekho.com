@@ -1,6 +1,10 @@
 import os
 import requests
 try:
+  import numpy as np
+except ModuleNotFoundError:
+  os.system("python3 -m pip install numpy")
+try:
   import pandas as pd
 except ModuleNotFoundError:
   os.system("python3 -m pip install pandas")
