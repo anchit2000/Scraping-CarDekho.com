@@ -99,7 +99,7 @@ columns_max = list(set(columns_max))
 
 df_all_models = pd.DataFrame(columns = columns_max)
 for i in range(len(df_list)):
-  df_all_models.loc[i] = df_list[i].T.to_dict()[1]
+  df_all_models.loc[i] = df_list[i].T.to_dict()[0]
 
 df_all_models = df_all_models.replace(np.nan,"Not Available")
 df_all_models.to_csv("car_details.csv")
